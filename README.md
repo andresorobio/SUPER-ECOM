@@ -81,3 +81,22 @@ data**, per the agent's anti-hallucination rules.
 - Does **not** modify your auth system, existing DB, or global design system.
 - DB migration only **adds** tables and references `users(id)`.
 - To add to navigation, link the page that renders `<ProductAnalyzer />`.
+
+
+## Static preview (no build needed)
+A self-contained visual mockup lives at `preview/index.html`. It needs no
+dependencies and renders the UI with sample data — handy for previewing on
+mobile via an HTML viewer. The real app still requires `npm install` + an LLM
+key.
+
+## Deploy to Vercel
+1. Import `andresorobio/SUPER-ECOM` in Vercel (framework auto-detected: Next.js).
+2. Add the env vars from `.env.example` (at minimum an LLM key + `JWT_SECRET`).
+3. Deploy. The analyze route runs as a Node serverless function (`vercel.json`
+   sets `maxDuration: 60`). Use a hosted Redis/Postgres if you enable caching
+   and persistence in production.
+
+## Add to navigation
+- A ready page exists at `app/tools/odm-agent/page.tsx` (route `/tools/odm-agent`).
+- Drop `OdmAgentNavItem` from `components/NavIntegrationExample.jsx` into your
+  sidebar to link it (does not modify your existing nav/design system).

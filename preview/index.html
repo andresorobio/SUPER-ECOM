@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ODM Sourcing Agent — Vista previa</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #0b0f17; color: #e5e7eb;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    padding: 20px 14px 60px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .title { text-align: center; margin-bottom: 20px; }
+  .title h1 { font-size: 24px; font-weight: 800; margin: 0; }
+  .title p { color: #9ca3af; font-size: 13px; margin: 6px 0 0; }
+  .banner {
+    background: rgba(234,179,8,.12); border: 1px solid rgba(234,179,8,.35);
+    color: #fde68a; font-size: 12px; border-radius: 10px; padding: 10px 12px; margin-bottom: 18px;
+  }
+  .panel { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 18px; }
+  textarea {
+    width: 100%; height: 90px; resize: none; background: rgba(0,0,0,.3);
+    border: 1px solid rgba(255,255,255,.1); border-radius: 10px; color: #f3f4f6;
+    padding: 12px; font-size: 14px;
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .count { font-size: 12px; color: #9ca3af; }
+  .btn-green { background: #22c55e; color: #000; font-weight: 700; border: 0; border-radius: 10px; padding: 10px 18px; font-size: 14px; cursor: pointer; }
+  .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,.15); color: #e5e7eb; border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin: 22px 0 16px; }
+  .card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; padding: 18px; margin-bottom: 20px; }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+  .pname { font-size: 18px; font-weight: 800; margin: 0; color: #fff; }
+  .badge { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+  .score { width: 64px; height: 64px; border-radius: 50%; border: 4px solid; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; }
+  .score-wrap { text-align: center; }
+  .score-wrap small { color: #9ca3af; font-size: 11px; }
+  .quick { background: rgba(0,0,0,.2); border-radius: 10px; padding: 12px; font-size: 14px; color: #d1d5db; margin: 14px 0; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  @media (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .crit { display: flex; gap: 8px; background: rgba(255,255,255,.02); border-radius: 8px; padding: 8px 10px; }
+  .crit b { font-size: 12px; color: #e5e7eb; }
+  .crit span.r { font-size: 11px; color: #9ca3af; display: block; }
+  .mark { font-weight: 800; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .pc h4 { margin: 0 0 6px; font-size: 12px; }
+  .pc ul { margin: 0; padding-left: 16px; }
+  .pc li { font-size: 12px; color: #d1d5db; margin-bottom: 3px; }
+  .sourcing-btn { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center;
+    background: rgba(34,197,94,.1); color: #6ee7b7; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 18px; }
+  .sub { border: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.2); border-radius: 10px; padding: 12px; margin-top: 10px; }
+  .sub h5 { margin: 0 0 8px; font-size: 12px; color: #e5e7eb; }
+  .chip { display: inline-block; background: rgba(255,255,255,.05); border-radius: 6px; padding: 4px 9px; font-size: 11px; margin: 0 6px 6px 0; color: #e5e7eb; }
+  .pill { display: inline-block; border: 1px solid rgba(52,211,153,.4); color: #6ee7b7; border-radius: 999px; padding: 4px 12px; font-size: 11px; margin: 0 6px 6px 0; }
+  pre { white-space: pre-wrap; background: rgba(0,0,0,.3); border-radius: 8px; padding: 12px; font-size: 11px; color: #d1d5db; overflow-x: auto; }
+  .hidden { display: none; }
+  .legend { text-align:center; font-size:11px; color:#6b7280; margin-top: 8px; }
+  .foot { text-align: center; font-size: 11px; color: #6b7280; margin-top: 30px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">
+    <h1>Agente de Inteligencia ODM</h1>
+    <p>Validación de productos ganadores + sourcing directo de fábrica.</p>
+  </div>
+
+  <div class="banner">
+    👁️ Vista previa estática (maqueta visual). La app real usa tu LLM + backend; aquí se muestran datos de ejemplo para que veas el diseño desde el móvil.
+  </div>
+
+  <div class="panel">
+    <textarea readonly>Corrector de postura magnético, Cable USB genérico</textarea>
+    <div class="row">
+      <span class="count">2/5 productos ingresados</span>
+      <button class="btn-green">Analizar Productos</button>
+    </div>
+    <div class="legend">🟢 8–10 Ganador · 🟡 6–7 Probar · 🔴 &lt;6 Descartado</div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-ghost">Exportar como PDF</button>
+    <button class="btn-ghost">Nueva búsqueda</button>
+  </div>
+
+  <!-- Card 1: Winner -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h3 class="pname">Corrector de postura magnético</h3>
+        <span class="badge" style="color:#22c55e;background:rgba(34,197,94,.12)">GANADOR ✓</span>
+      </div>
+      <div class="score-wrap">
+        <div class="score" style="border-color:#22c55e;color:#22c55e">9</div>
+        <small>/10</small>
+      </div>
+    </div>
+    <p class="quick">Ganador claro: dolor real + wow visual + margen alto. El reto es diferenciar marca, no la demanda.</p>
+    <div class="grid">
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Resuelve un problema real</b><span class="r">Alivia dolor de espalda recurrente por mala postura.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Validación de mercado</b><span class="r">Múltiples vendedores y demanda sostenida en redes.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Interacción en anuncios</b><span class="r">Before/after genera comentarios y etiquetados.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Tendencia evergreen</b><span class="r">Problema postural presente todo el año.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Margen 2.5x</b><span class="r">Costo landed bajo permite retail 3-4x.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Efecto wow visual</b><span class="r">Transformación de postura ideal para video corto.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Potencial ODM</b><span class="r">Fácil de personalizar tela, logo y empaque.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Exclusividad local</b><span class="r">Saturado en varios mercados.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Logística eficiente</b><span class="r">Ligero, plano, sin baterías ni líquidos.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Alto valor percibido</b><span class="r">Percibido como dispositivo de salud premium.</span></div></div>
+    </div>
+    <div class="pc">
+      <div><h4 style="color:#22c55e">PROS</h4><ul><li>Dolor recurrente y masivo</li><li>Demo viral en video</li><li>Marca blanca sencilla</li></ul></div>
+      <div><h4 style="color:#ef4444">CONTRAS</h4><ul><li>Mercado competido</li><li>Ajuste/tallas variables</li><li>Requiere educar al cliente</li></ul></div>
+    </div>
+
+    <button class="sourcing-btn" onclick="toggleSrc(this)">🏭 Estrategia de Sourcing ODM <span>▼</span></button>
+    <div class="src hidden">
+      <div class="sub">
+        <h5>Keywords de Alibaba (inglés)</h5>
+        <span class="chip">posture corrector wholesale</span>
+        <span class="chip">magnetic back brace custom logo</span>
+        <span class="chip">posture corrector ODM manufacturer</span>
+        <span class="chip">back support belt private label</span>
+        <span class="chip">posture brace OEM factory</span>
+      </div>
+      <div class="sub">
+        <h5>Filtros obligatorios</h5>
+        <span class="pill">ODM</span><span class="pill">R&amp;D</span>
+        <span class="pill">Verified Supplier</span><span class="pill">Trade Assurance</span>
+      </div>
+      <div class="sub">
+        <h5>Hack de las 3 estrellas</h5>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#9ca3af">
+          <li>Tallas inconsistentes</li><li>Material que aprieta</li><li>Velcro que se despega</li>
+        </ul>
+        <p style="font-size:12px;color:#6ee7b7;background:rgba(34,197,94,.1);padding:8px;border-radius:8px;margin-top:8px">
+          Mejora a exigir: tela transpirable hipoalergénica, velcro reforzado y guía de tallas S–XXL.
+        </p>
+      </div>
+      <div class="sub">
+        <h5>Mensaje al proveedor (EN)</h5>
+        <pre>Hello, we are a brand sourcing "magnetic posture corrector" for retail distribution.
+Could you please share: MOQ &amp; price tiers, OEM/ODM &amp; custom-logo support,
+sample cost &amp; lead time, target FOB unit price, and production lead time?
+A short raw video of the product on your line would help us move fast. Thank you.</pre>
+      </div>
+      <div class="sub">
+        <h5>Estrategia de búsqueda paso a paso</h5>
+        <pre>1. Aplica filtros ODM + R&amp;D + Verified Supplier + Trade Assurance.
+2. Usa búsqueda visual inversa con una foto del producto ganador.
+3. Revisa el catálogo oculto del proveedor (no solo lo listado).
+4. Pide video crudo de fábrica para verificar capacidad real.
+5. Cruza quejas de 3 estrellas de Amazon -> exige la versión mejorada.</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Discard -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h3 class="pname">Cable USB genérico</h3>
+        <span class="badge" style="color:#ef4444;background:rgba(239,68,68,.12)">DESCARTADO ✗</span>
+      </div>
+      <div class="score-wrap">
+        <div class="score" style="border-color:#ef4444;color:#ef4444">3</div>
+        <small>/10</small>
+      </div>
+    </div>
+    <p class="quick">Commodity saturado, sin wow ni ángulo de marca. Margen erosionado por precio. Descartar.</p>
+    <div class="grid">
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Resuelve un problema real</b><span class="r">Necesidad básica ya cubierta en exceso.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Validación de mercado</b><span class="r">Demanda existe pero es masiva y plana.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Interacción en anuncios</b><span class="r">Producto aburrido, no genera engagement.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Tendencia evergreen</b><span class="r">Demanda constante pero sin diferenciación.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Margen 2.5x</b><span class="r">Guerra de precios destruye el margen.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Efecto wow visual</b><span class="r">Cero factor sorpresa.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Potencial ODM</b><span class="r">Commodity sin espacio para marca.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Exclusividad local</b><span class="r">Disponible en todas partes.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#22c55e">✓</span><div><b>Logística eficiente</b><span class="r">Ligero y barato de enviar.</span></div></div>
+      <div class="crit"><span class="mark" style="color:#ef4444">✗</span><div><b>Alto valor percibido</b><span class="r">Percibido como desechable barato.</span></div></div>
+    </div>
+    <div class="pc">
+      <div><h4 style="color:#22c55e">PROS</h4><ul><li>Envío barato</li><li>Demanda constante</li><li>Sin restricciones legales</li></ul></div>
+      <div><h4 style="color:#ef4444">CONTRAS</h4><ul><li>Saturación total</li><li>Margen mínimo</li><li>Sin marca posible</li></ul></div>
+    </div>
+    <!-- Sin sourcing: score <= 7 -->
+  </div>
+
+  <div class="foot">
+    Maqueta estática del módulo · Repo: andresorobio/SUPER-ECOM<br/>
+    La aplicación real (Next.js + LLM) se ejecuta con <code>npm install &amp;&amp; npm run dev</code>.
+  </div>
+</div>
+
+<script>
+  function toggleSrc(btn){
+    var box = btn.parentElement.querySelector('.src');
+    var arrow = btn.querySelector('span');
+    box.classList.toggle('hidden');
+    arrow.textContent = box.classList.contains('hidden') ? '▼' : '▲';
+  }
+</script>
+</body>
+</html>
