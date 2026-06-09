@@ -125,3 +125,18 @@ See `SUPERAGENT.md` for the full list. Highlights added on top of the core analy
 
 **MCP**: also exposes `calculate_profit`, `compliance_risk_check`,
 `generate_marketing_kit` to a parent orchestrator.
+
+
+## Round 2 — automation & integrations
+- `POST /api/monitor` — re-scan watchlist (JWT or `x-cron-secret`), webhook alert
+  on new winners. Schedule it with Vercel Cron / GitHub Actions.
+- `GET /api/analytics` — win-rate, verdict distribution, avg score, top products.
+- New tools (auto-used by the agent): `shipping_estimator` (volumetric offline),
+  `supplier_comparator` (weighted ODM supplier ranking).
+- API-key auth for server-to-server (`API_KEYS="key:userId,..."`) in addition to JWT.
+
+### Frontend now wired to the superpowers
+- **Streaming**: text mode uses `/api/analyze-stream`; cards appear progressively.
+- **Image mode**: paste a URL or upload a screenshot → vision analysis.
+- **Per-card**: inline profit/ROAS calculator, "Generar marketing" (Winners),
+  "Seguir producto" (watchlist).

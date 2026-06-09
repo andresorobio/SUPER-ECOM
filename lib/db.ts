@@ -127,3 +127,64 @@ export async function removeFromWatchlist(
 export function isDbConfigured(): boolean {
   return Boolean(getPool());
 }
+
+/* ------------------------------ Analytics --------------------------------- */
+
+export interface AnalyticsSummary {
+  total_analyses: number;
+  winners: number;
+  tests: number;
+  discards: number;
+  win_rate_pct: number;
+  avg_score: number;
+  top_products: { product_name: string; count: number; avg_score: number }[];
+}
+
+export async function getAnalyticsSummary(userId: string): Promise<AnalyticsSummary> {
+  const empty: AnalyticsSummary = {
+    total_analyses: 0,
+    winners: 0,
+    tests: 0,
+    discards: 0,
+    win_rate_pct: 0,
+    avg_score: 0,
+    top_products: []
+  };
+  const p = getPool();
+  if (!p) return empty;
+  try {
+    const totals = await p.query(
+      `SELECT
+         COUNT(*)::int AS total,
+         COUNT(*) FILTER (WHERE verdict = 'Winner')::int AS winners,
+         COUNT(*) FILTER (WHERE verdict = 'Test')::int AS tests,
+         COUNT(*) FILTER (WHERE verdict = 'Discard')::int AS discards,
+         COALESCE(AVG(score), 0)::float AS avg_score
+       FROM product_analyses WHERE user_id = $1`,
+      [userId]
+    );
+    const top = await p.query(
+      `SELECT product_name, COUNT(*)::int AS count, COALESCE(AVG(score),0)::float AS avg_score
+       FROM product_analyses WHERE user_id = $1
+       GROUP BY product_name ORDER BY count DESC, avg_score DESC LIMIT 10`,
+      [userId]
+    );
+    const t = totals.rows[0];
+    const total = t.total ?? 0;
+    return {
+      total_analyses: total,
+      winners: t.winners ?? 0,
+      tests: t.tests ?? 0,
+      discards: t.discards ?? 0,
+      win_rate_pct: total ? Math.round(((t.winners ?? 0) / total) * 1000) / 10 : 0,
+      avg_score: Math.round((t.avg_score ?? 0) * 10) / 10,
+      top_products: top.rows.map((r: any) => ({
+        product_name: r.product_name,
+        count: r.count,
+        avg_score: Math.round(r.avg_score * 10) / 10
+      }))
+    };
+  } catch {
+    return empty;
+  }
+}

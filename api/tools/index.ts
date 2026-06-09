@@ -14,6 +14,8 @@ import { amazonReviewsTool } from "./amazonReviews";
 import { profitCalculatorTool } from "./profitCalculator";
 import { complianceCheckTool } from "./complianceCheck";
 import { competitorAdsTool } from "./competitorAds";
+import { shippingEstimatorTool } from "./shippingEstimator";
+import { supplierComparatorTool } from "./supplierComparator";
 
 export const toolDefinitions: Record<string, ToolDefinition> = {
   google_trends_check: googleTrendsTool,
@@ -21,7 +23,9 @@ export const toolDefinitions: Record<string, ToolDefinition> = {
   amazon_reviews_analyzer: amazonReviewsTool,
   profit_calculator: profitCalculatorTool,
   compliance_risk_check: complianceCheckTool,
-  competitor_ad_spy: competitorAdsTool
+  competitor_ad_spy: competitorAdsTool,
+  shipping_estimator: shippingEstimatorTool,
+  supplier_comparator: supplierComparatorTool
 };
 
 /** OpenAI Chat Completions `tools` format. */
@@ -59,4 +63,5 @@ export async function runTool(
 
 export { googleTrendsTool, alibabaSearchTool, amazonReviewsTool };
 export { profitCalculatorTool, complianceCheckTool, competitorAdsTool };
+export { shippingEstimatorTool, supplierComparatorTool };
 export type { ToolDefinition, ToolResult, JsonSchemaTool } from "./types";

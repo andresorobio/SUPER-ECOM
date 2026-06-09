@@ -53,24 +53,30 @@ por un orquestador padre como subagente.
 
 ---
 
+## ✅ Implementado (ronda 2 — antes propuesto)
+
+- **Monitor de tendencias + alertas** — `POST /api/monitor` re-escanea la
+  watchlist (vía JWT o `x-cron-secret` para cron) y dispara webhook si un
+  producto llega a Ganador. `lib/notify.ts`.
+- **Comparador de proveedores** — `lib/suppliers.ts` + tool `supplier_comparator`
+  (rúbrica ponderada: rating, verificación, Trade Assurance, ODM, MOQ, precio).
+- **Calculadora de envío** — tool `shipping_estimator` (peso volumétrico, zona,
+  baterías/líquidos). Heurística offline; lista para conectar courier real.
+- **Panel de analítica** — `GET /api/analytics`: total, distribución de
+  veredictos, win-rate, score promedio, top productos.
+- **API keys** — autenticación server-to-server vía `API_KEYS` (además de JWT).
+- **Frontend conectado** — streaming progresivo, modo imagen (visión), kit de
+  marketing en tarjeta, calculadora de rentabilidad inline, seguir producto.
+
 ## 🧭 Propuesto (siguiente nivel)
 
-1. **Monitor de tendencias + alertas**: re-escanear la watchlist por cron y
-   avisar (email/webhook) cuando un producto entra en fase de despegue.
-2. **Comparador de proveedores**: scoring de fábricas (MOQ, rating, respuesta,
-   Trade Assurance) y ranking automático.
-3. **Generador de creativos visuales**: bridge a un modelo de imagen para mockups
+1. **Generador de creativos visuales**: bridge a un modelo de imagen para mockups
    de anuncio y packaging ODM.
-4. **Calculadora de envío real**: integración con couriers (peso volumétrico,
-   destino, aranceles) para landed cost exacto.
-5. **Embeddings + deduplicación semántica**: detectar productos equivalentes y
-   reusar análisis; búsqueda semántica del historial.
-6. **Panel de analítica**: tasa de ganadores, distribución de scores, categorías
-   más rentables por usuario.
-7. **Webhooks/Zapier + API keys** para integraciones externas y planes.
-8. **Multi-idioma de salida** y multi-mercado (US/MX/CO/ES) por defecto.
-9. **A/B testing de ángulos** con seguimiento de resultados reales de campañas.
-10. **Modo equipo**: roles, comentarios y aprobación de productos antes de invertir.
+2. **Embeddings + deduplicación semántica**: detectar productos equivalentes y
+   búsqueda semántica del historial.
+3. **A/B testing de ángulos** con seguimiento de resultados reales de campañas.
+4. **Modo equipo**: roles, comentarios y aprobación antes de invertir.
+5. **Couriers reales** (DHL/UPS/17track) para landed cost exacto y tracking.
 
 > Cada propuesta sigue la misma regla: si necesita datos externos, se integra una
 > API real; si no hay clave, se degrada con transparencia. Cero mock data.

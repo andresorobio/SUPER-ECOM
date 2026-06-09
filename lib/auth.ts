@@ -24,6 +24,13 @@ export function authenticate(authorizationHeader?: string | null): AuthUser {
     throw new AuthError("Missing or malformed Authorization header");
   }
   const token = authorizationHeader.slice("Bearer ".length).trim();
+
+  // Path 1 — static API keys (for server-to-server / integrations).
+  // Configure as: API_KEYS="key1:userId1,key2:userId2"
+  const apiUser = resolveApiKey(token);
+  if (apiUser) return { userId: apiUser, auth: "api_key" };
+
+  // Path 2 — JWT bearer.
   try {
     const payload = jwt.verify(token, config.infra.jwtSecret) as Record<
       string,
@@ -39,4 +46,15 @@ export function authenticate(authorizationHeader?: string | null): AuthUser {
     if (err instanceof AuthError) throw err;
     throw new AuthError("Invalid or expired token");
   }
+}
+
+/** Map an API key to a userId using the API_KEYS env var. Returns null if none. */
+function resolveApiKey(token: string): string | null {
+  const raw = process.env.API_KEYS;
+  if (!raw) return null;
+  for (const pair of raw.split(",")) {
+    const [key, userId] = pair.split(":").map((s) => s.trim());
+    if (key && userId && key === token) return userId;
+  }
+  return null;
 }
