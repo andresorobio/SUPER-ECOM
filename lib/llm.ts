@@ -183,3 +183,87 @@ export function extractJson(text: string): string {
 const FALLBACK_SYSTEM_PROMPT =
   "You are ODM Scout. Score each product on 10 binary criteria and return ONLY valid JSON " +
   '{ "analyses": [...] } with no markdown. Enable sourcing only when score > 7.';
+
+
+/* -------------------------------------------------------------------------- */
+/*  Generic single-shot JSON completion (no tools)                            */
+/*  Used by marketing & vision generators that need a JSON object back.       */
+/* -------------------------------------------------------------------------- */
+
+export interface JsonCompletionOptions {
+  system: string;
+  user: string;
+  /** Optional image (base64 data URL or remote URL) for multimodal calls. */
+  imageUrl?: string;
+}
+
+/** Returns the raw JSON string from a single completion (provider-agnostic). */
+export async function runJsonCompletion(opts: JsonCompletionOptions): Promise<string> {
+  if (config.llm.provider === "openai") return openAiJson(opts);
+  return anthropicJson(opts);
+}
+
+async function anthropicJson(opts: JsonCompletionOptions): Promise<string> {
+  if (!config.llm.anthropicApiKey) {
+    throw new LlmError("ANTHROPIC_API_KEY is not configured", "NO_API_KEY");
+  }
+  const Anthropic = (await import("@anthropic-ai/sdk")).default;
+  const client = new Anthropic({
+    apiKey: config.llm.anthropicApiKey,
+    timeout: config.llm.timeoutMs
+  });
+
+  const content: any[] = [{ type: "text", text: opts.user }];
+  if (opts.imageUrl) {
+    if (opts.imageUrl.startsWith("data:")) {
+      const [meta, b64] = opts.imageUrl.split(",");
+      const mediaType = meta.slice(5, meta.indexOf(";")) || "image/jpeg";
+      content.unshift({
+        type: "image",
+        source: { type: "base64", media_type: mediaType, data: b64 }
+      });
+    } else {
+      content.unshift({ type: "image", source: { type: "url", url: opts.imageUrl } });
+    }
+  }
+
+  const response = await client.messages.create({
+    model: config.llm.model,
+    max_tokens: config.llm.maxTokens,
+    system: opts.system,
+    messages: [{ role: "user", content }]
+  });
+  const text = response.content
+    .filter((c: any) => c.type === "text")
+    .map((c: any) => c.text)
+    .join("");
+  return extractJson(text);
+}
+
+async function openAiJson(opts: JsonCompletionOptions): Promise<string> {
+  if (!config.llm.openaiApiKey) {
+    throw new LlmError("OPENAI_API_KEY is not configured", "NO_API_KEY");
+  }
+  const OpenAI = (await import("openai")).default;
+  const client = new OpenAI({
+    apiKey: config.llm.openaiApiKey,
+    timeout: config.llm.timeoutMs
+  });
+
+  const userContent: any = opts.imageUrl
+    ? [
+        { type: "text", text: opts.user },
+        { type: "image_url", image_url: { url: opts.imageUrl } }
+      ]
+    : opts.user;
+
+  const completion = await client.chat.completions.create({
+    model: config.llm.model,
+    messages: [
+      { role: "system", content: opts.system },
+      { role: "user", content: userContent }
+    ],
+    response_format: { type: "json_object" }
+  });
+  return extractJson(completion.choices[0].message.content ?? "");
+}

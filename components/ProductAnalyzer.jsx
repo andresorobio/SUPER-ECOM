@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AnalysisCard from "./AnalysisCard";
 import { buildReportHtml } from "./pdfReport";
+import { exportCsv, exportJson } from "./exporters";
 
 const MAX_PRODUCTS = 5;
 const HISTORY_KEY = "odm_recent_searches";
@@ -180,6 +181,18 @@ export default function ProductAnalyzer() {
                 className="rounded-lg border border-white/15 px-4 py-2 text-xs font-semibold text-gray-200 hover:bg-white/5"
               >
                 Exportar como PDF
+              </button>
+              <button
+                onClick={() => exportCsv(analyses)}
+                className="rounded-lg border border-white/15 px-4 py-2 text-xs font-semibold text-gray-200 hover:bg-white/5"
+              >
+                Exportar CSV
+              </button>
+              <button
+                onClick={() => exportJson(analyses)}
+                className="rounded-lg border border-white/15 px-4 py-2 text-xs font-semibold text-gray-200 hover:bg-white/5"
+              >
+                Exportar JSON
               </button>
               <button
                 onClick={reset}

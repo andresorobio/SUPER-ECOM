@@ -100,3 +100,28 @@ key.
 - A ready page exists at `app/tools/odm-agent/page.tsx` (route `/tools/odm-agent`).
 - Drop `OdmAgentNavItem` from `components/NavIntegrationExample.jsx` into your
   sidebar to link it (does not modify your existing nav/design system).
+
+
+## Super-agent capabilities
+See `SUPERAGENT.md` for the full list. Highlights added on top of the core analyzer:
+
+**New endpoints**
+- `POST /api/analyze-stream` — Server-Sent Events; cards stream in as each
+  product is analyzed (events: `start`, `progress`, `result`, `error`, `done`).
+- `POST /api/analyze-image` — vision: send `{ imageUrl }` (https or base64 data
+  URL) to identify + score a product from a screenshot/photo.
+- `POST /api/generate-marketing` — `{ product, audience?, language? }` returns a
+  launch kit: ad angles, hooks, ad copy, landing-page outline, UGC ideas.
+- `GET /api/history` and `GET/POST/DELETE /api/watchlist` — require `DATABASE_URL`
+  (return 501 otherwise).
+
+**New function-calling tools** (auto-used by the agent)
+- `profit_calculator` — unit economics, break-even ROAS/CPA, recommended price (offline).
+- `compliance_risk_check` — flags batteries, IP/trademark, medical claims, vape,
+  liquids, electricals affecting ads/payments/shipping (offline).
+- `competitor_ad_spy` — active competitor ads via Meta Ad Library (`META_AD_LIBRARY_TOKEN`).
+
+**New exports**: CSV and JSON (in addition to PDF) from the results dashboard.
+
+**MCP**: also exposes `calculate_profit`, `compliance_risk_check`,
+`generate_marketing_kit` to a parent orchestrator.

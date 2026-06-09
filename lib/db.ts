@@ -61,3 +61,69 @@ export async function getRecentAnalyses(
     return [];
   }
 }
+
+/* ------------------------------ Watchlist --------------------------------- */
+
+export interface WatchlistItem {
+  id: string;
+  product_name: string;
+  notes: string | null;
+  added_at: string;
+}
+
+export async function addToWatchlist(
+  userId: string,
+  productName: string,
+  notes = ""
+): Promise<WatchlistItem | null> {
+  const p = getPool();
+  if (!p) return null;
+  try {
+    const { rows } = await p.query(
+      `INSERT INTO product_watchlist (user_id, product_name, notes)
+       VALUES ($1, $2, $3)
+       RETURNING id, product_name, notes, added_at`,
+      [userId, productName, notes || null]
+    );
+    return rows[0] as WatchlistItem;
+  } catch {
+    return null;
+  }
+}
+
+export async function getWatchlist(userId: string): Promise<WatchlistItem[]> {
+  const p = getPool();
+  if (!p) return [];
+  try {
+    const { rows } = await p.query(
+      `SELECT id, product_name, notes, added_at FROM product_watchlist
+       WHERE user_id = $1 ORDER BY added_at DESC`,
+      [userId]
+    );
+    return rows as WatchlistItem[];
+  } catch {
+    return [];
+  }
+}
+
+export async function removeFromWatchlist(
+  userId: string,
+  id: string
+): Promise<boolean> {
+  const p = getPool();
+  if (!p) return false;
+  try {
+    const res = await p.query(
+      `DELETE FROM product_watchlist WHERE id = $1 AND user_id = $2`,
+      [id, userId]
+    );
+    return (res.rowCount ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** True when a database is configured (used by routes to return 501 otherwise). */
+export function isDbConfigured(): boolean {
+  return Boolean(getPool());
+}

@@ -11,6 +11,8 @@
 
 import { analyzeWithLlm } from "@/lib/llm";
 import { normalizeAnalyses, type ProductAnalysis } from "@/schemas/product.schema";
+import { computeProfit, type ProfitInput, type ProfitResult } from "@/lib/profit";
+import { complianceCheckTool, type ComplianceData } from "@/api/tools/complianceCheck";
 
 export async function evaluateProduct(name: string): Promise<ProductAnalysis> {
   const raw = await analyzeWithLlm([name]);
@@ -19,6 +21,21 @@ export async function evaluateProduct(name: string): Promise<ProductAnalysis> {
     throw new Error("No analysis produced for the product");
   }
   return list[0];
+}
+
+/** Unit-economics for a product (pure, offline). */
+export function calculateProfit(input: ProfitInput): ProfitResult {
+  return computeProfit(input);
+}
+
+/** Compliance / risk screen for a product (pure, offline). */
+export async function checkCompliance(
+  productName: string,
+  description = ""
+): Promise<ComplianceData> {
+  const res = await complianceCheckTool.execute({ product_name: productName, description });
+  if (!res.ok || !res.data) throw new Error(res.error ?? "compliance check failed");
+  return res.data;
 }
 
 /**

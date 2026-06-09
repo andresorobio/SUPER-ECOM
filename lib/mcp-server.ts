@@ -43,8 +43,11 @@ import {
 import {
   evaluateProduct,
   generateSupplierMessage,
-  searchAlibabaKeywords
+  searchAlibabaKeywords,
+  calculateProfit,
+  checkCompliance
 } from "@/lib/agent-tools";
+import { generateMarketingKit } from "@/lib/marketing";
 
 const server = new Server(
   { name: "odm-sourcing-agent", version: "1.0.0" },
@@ -92,6 +95,52 @@ const TOOLS = [
       },
       required: ["product"]
     }
+  },
+  {
+    name: "calculate_profit",
+    description:
+      "Compute unit economics: landed cost, fees, contribution margin, break-even ROAS/CPA and a recommended retail price.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        productCost: { type: "number", description: "Supplier unit cost" },
+        shippingCost: { type: "number" },
+        sellingPrice: { type: "number" },
+        platformFeePct: { type: "number" },
+        paymentFeePct: { type: "number" },
+        adSpendPerUnit: { type: "number" },
+        targetMarginPct: { type: "number" },
+        priceMultiplier: { type: "number" }
+      },
+      required: ["productCost"]
+    }
+  },
+  {
+    name: "compliance_risk_check",
+    description:
+      "Screen a product for compliance/risk signals (batteries, IP/trademark, medical claims, vape, liquids) affecting ads, payments and shipping.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        product: { type: "string", description: "Product name" },
+        description: { type: "string" }
+      },
+      required: ["product"]
+    }
+  },
+  {
+    name: "generate_marketing_kit",
+    description:
+      "Generate ad angles, scroll-stopping hooks, primary ad copy and a landing-page outline for a winning product.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        product: { type: "string", description: "Product name" },
+        audience: { type: "string", description: "Optional target audience" },
+        language: { type: "string", description: 'Output language: "es" or "en"' }
+      },
+      required: ["product"]
+    }
   }
 ];
 
@@ -125,6 +174,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const keywords = searchAlibabaKeywords(String(a.product));
         return {
           content: [{ type: "text", text: JSON.stringify(keywords, null, 2) }]
+        };
+      }
+      case "calculate_profit": {
+        if (typeof a.productCost !== "number") {
+          throw new Error("Missing required argument: productCost");
+        }
+        const result = calculateProfit(a as any);
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+        };
+      }
+      case "compliance_risk_check": {
+        if (!a.product) throw new Error("Missing required argument: product");
+        const result = await checkCompliance(String(a.product), String(a.description ?? ""));
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+        };
+      }
+      case "generate_marketing_kit": {
+        if (!a.product) throw new Error("Missing required argument: product");
+        const kit = await generateMarketingKit({
+          product: String(a.product),
+          audience: a.audience ? String(a.audience) : undefined,
+          language: a.language === "en" ? "en" : "es"
+        });
+        return {
+          content: [{ type: "text", text: JSON.stringify(kit, null, 2) }]
         };
       }
       default:
